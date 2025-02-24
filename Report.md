@@ -80,7 +80,7 @@ Comparing **throughput** across time and throughput per second charts below, we 
 
 ![My Image](charts/LoadBalancedServer.png)
 
-![My Image](charts/Single-Load-ThroughputComparison.png)
+![My Image](charts/Single-Load-ThrougputComparison.png)
 
 Observation towards **success rate** comparison:
 - As load increases, success rate drops for both setups.
