@@ -17,7 +17,7 @@ We implemented a **MySQL** database running on AWS RDS, which contains a single 
 ## 2. A Single Server
 
 ## 3. Two Load Balanced Servers
-Same as using a single server, we use a thread group size of 10 and delay time 2 seconds. 
+We used a thread group size of 10 and delay time 2 seconds. 
 |Configuration|Load Balanced Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
 |-|-|-|-|
 |Wall Time(s)| |232| |
