@@ -86,11 +86,7 @@ Observation towards **CPU utilization**:
 - Load balancing reduces individual server load.
 - Load balancing distributes resources better. For a single server setup, CPU becomes a bottleneck as all traffics go to the same machine. With load balancing, CPU overload on a single server can be prevented.
 
-|     Configuration          |10 10 2|10 20 2|10 30 2|
-|---------------|-------------|---------------------|--------|
-|Single Server|   55.9           |   73.6         |    93.2       |
-|Load Balanced Servers| 40.2, 28.3|57.9, 39.7|64.5, 44.5|
-
+![My Image](charts/CPU.png)
 
 
 Observation towards **success rate** comparison:
