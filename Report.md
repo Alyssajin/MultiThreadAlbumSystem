@@ -86,7 +86,11 @@ Observation towards **success rate** comparison:
   
 ![My Image](charts/Single-Load-SuccessRate.png)
 
-Regarding **request latency**, we observed that load-balanced servers improve performance for GET requests but introduce additional delay for POST requests. Our current assumption is that the bottleneck in the load-balanced setup stems from the database read process, which may be impacting write operations. Further analysis is needed to determine whether optimizing database indexing, connection pooling, or caching mechanisms could mitigate this delay.
+Regarding **request latency**, we observed load-balanced servers
+- improve performance for GET requests, but
+- introduce additional delay for POST requests
+
+Our current assumption is that the bottleneck in the load-balanced setup stems from the database read process, which may be impacting write operations. Further analysis is needed to determine whether optimizing database indexing, connection pooling, or caching mechanisms could mitigate this delay.
 
 ![My Image](charts/Single-Load-MeanLatency.png)
 
