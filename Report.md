@@ -13,3 +13,9 @@ We implemented a **MySQL** database running on AWS RDS, which contains a single 
 |image_size|INT NOT NULL|Size of image file in bytes|
 
 *We used the stock image with a size of approximately 25KB.*
+
+## 2. A Single Server
+
+## 3. Two Load Balanced Server
+
+## 4. Optimized Server Configuration
