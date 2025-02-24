@@ -70,7 +70,7 @@ We used a thread group size of 10 and delay time 2 seconds.
 
 ### Single Server vs. Load Balanced Servers
 
-Comparing **throughput across time** charts below, we notice load balanced servers have the following advantages:
+Comparing **throughput** across time and throughput per second charts below, we notice load balanced servers have the following advantages:
 - Higher throughput
 - More stability in throughput
 - Scalability with increasing load
@@ -79,6 +79,8 @@ Comparing **throughput across time** charts below, we notice load balanced serve
 ![My Image](charts/SingleServer.png)
 
 ![My Image](charts/LoadBalancedServer.png)
+
+![My Image](charts/Single-Load-ThroughputComparison.png)
 
 Observation towards **success rate** comparison:
 - As load increases, success rate drops for both setups.
