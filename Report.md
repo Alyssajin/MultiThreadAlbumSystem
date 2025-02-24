@@ -76,7 +76,7 @@ Comparing **throughput** across time and throughput per second charts below, we 
 - Scalability with increasing load
 - Smoother decline at the end
 
-![My Image](charts/SingleServer.png)
+![My Image](charts/NewSingleServer.png)
 
 ![My Image](charts/LoadBalancedServer.png)
 
