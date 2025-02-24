@@ -86,6 +86,10 @@ Observation towards **success rate** comparison:
   
 ![My Image](charts/Single-Load-SuccessRate.png)
 
+Regarding **request latency**, we observed that load-balanced servers improve performance for GET requests but introduce additional delay for POST requests. Our current assumption is that the bottleneck in the load-balanced setup stems from the database read process, which may be impacting write operations. Further analysis is needed to determine whether optimizing database indexing, connection pooling, or caching mechanisms could mitigate this delay.
+
+![My Image](charts/Single-Load-MeanLatency.png)
+
 ## 6. Future Work
 
 We also observed that storing the album cover images in an S3 bucket could potentially reduce request times by offloading storage and retrieval operations from the database. However, due to time constraints, we were unable to conduct a detailed performance evaluation to quantify the impact. Future work could include benchmarking the request times with and without S3 integration to assess its effectiveness in improving overall system performance.
