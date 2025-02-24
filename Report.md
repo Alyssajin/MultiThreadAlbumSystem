@@ -68,6 +68,8 @@ We used a thread group size of 10 and delay time 2 seconds.
 
 ## 5. Comparisons
 
+We compared throughput, CPU utilization, success rate, and request latency of different configurations.
+
 ### Single Server vs. Load Balanced Servers
 
 Comparing **throughput** across time and throughput per second charts below, we notice load balanced servers have the following advantages:
