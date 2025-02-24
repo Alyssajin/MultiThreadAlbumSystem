@@ -16,7 +16,7 @@ We implemented a **MySQL** database running on AWS RDS, which contains a single 
 
 ## 2. A Single Server
 We used a thread group size of 10 and delay time 2 seconds. 
-|Configuration|Single Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
+|Configuration|Single Server - numThreadGroups 10|Single Server - numThreadGroups 20|Single Server -numThreadGroups 30|
 |-----------------------------|----------|----------|----------|
 |Wall Time(s)                 | 199      |       271|   438     |
 |Throughput(request/s)        |   1005   |   1476   | 1369|
