@@ -101,11 +101,11 @@ Regarding **request latency**, we observed load-balanced servers
 
 Our current assumption is that the bottleneck in the load-balanced setup stems from the database read process, which may be impacting write operations. Further analysis is needed to determine whether optimizing database indexing, connection pooling, or caching mechanisms could mitigate this delay.
 
-![My Image](charts/Single-Load-MeanLatency.png)
+![My Image](charts/Mean%20Latency%20update.png)
 
-![My Image](charts/50Latency\ update.png)
+![My Image](charts/50Latency%20update.png)
 
-![My Image](charts/Single-Load-P99Latency.png)
+![My Image](charts/99thLatency%20Update.png)
 
 ## 6. Future Work
 
