@@ -85,3 +85,7 @@ Observation towards **success rate** comparison:
 - However, load balanced server handles heavy stress better and maintains higher success rates than the single server.
   
 ![My Image](charts/Single-Load-SuccessRate.png)
+
+## 6. Future Work
+
+We also observed that storing the album cover images in an S3 bucket could potentially reduce request times by offloading storage and retrieval operations from the database. However, due to time constraints, we were unable to conduct a detailed performance evaluation to quantify the impact. Future work could include benchmarking the request times with and without S3 integration to assess its effectiveness in improving overall system performance.
