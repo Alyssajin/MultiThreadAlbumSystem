@@ -15,7 +15,28 @@ We implemented a **MySQL** database running on AWS RDS, which contains a single 
 *We used the stock image with a size of approximately 25KB.*
 
 ## 2. A Single Server
-
+We used a thread group size of 10 and delay time 2 seconds. 
+|Configuration|Single Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
+|-----------------------------|----------|----------|----------|
+|Wall Time(s)                 | 199      |       271|   438     |
+|Throughput(request/s)        |   1005   |   1476   | 1369|
+|Successful GET Request Number|75412     |113611    |116767 |
+|Failed GET Request Number    |24588     |86389     |183233 |
+|GET Request Success Rate     |  75.412% |56.806%   | 38.922%|
+|Successful POST Request Number|80000    |133938    | 134615|
+|Failed POST Request Number   |  20000   |  66062   | 165385|
+|POST Request Success Rate    | 80%  | 66.969%  | 44.872%|
+|Overall Request Success Rate|77.706%    |61.887%| 41.909%|
+|GET Mean Latency            |76.796   |106.28385| 164.518|
+|POST Mean Latency         |105.28658 |114.18749|185.239 |
+|GET Min Latency           |19          |20     |       20|
+|POST Min Latency         |25        |    25|       26 |
+|GET Max Latency|1049 |16329|18318 |
+|POST Max Latency|1194 |16329| 18318|
+|GET 50th Percentile| 74.0|80.0| 81.0|
+|POST 50th Percentile| 96.0|90.0| 93.0|
+|GET 99th Percentile| 167.0|480.0| 1123.0|
+|POST 99th Percentile|313.0 |465.0| 1142.0|
 ## 3. Two Load Balanced Servers
 We used a thread group size of 10 and delay time 2 seconds. 
 |Configuration|Load Balanced Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
