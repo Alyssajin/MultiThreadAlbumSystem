@@ -37,6 +37,9 @@ We used a thread group size of 10 and delay time 2 seconds.
 |POST 50th Percentile| 96.0|90.0| 93.0|
 |GET 99th Percentile| 167.0|480.0| 1123.0|
 |POST 99th Percentile|313.0 |465.0| 1142.0|
+
+![My Image](charts/SingleServer.png)
+
 ## 3. Two Load Balanced Servers
 We used a thread group size of 10 and delay time 2 seconds. 
 |Configuration|Load Balanced Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
@@ -61,6 +64,6 @@ We used a thread group size of 10 and delay time 2 seconds.
 |GET 99th Percentile| 182.0|274.0| 1062.0|
 |POST 99th Percentile|433.0 |391.0| 1140.0|
 
-
+![My Image](charts/LoadBalancedServer.png)
 
 ## 4. Optimized Server Configuration
