@@ -16,6 +16,30 @@ We implemented a **MySQL** database running on AWS RDS, which contains a single 
 
 ## 2. A Single Server
 
-## 3. Two Load Balanced Server
+## 3. Two Load Balanced Servers
+Same as using a single server, we use a thread group size of 10 and delay time 2 seconds. 
+|Configuration|Load Balanced Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
+|-|-|-|-|
+|Wall Time(s)| |232| |
+|Throughput(request/s)| |1724| |
+|Successful GET Request Number| |149234| |
+|Failed GET Request Number| |50766| |
+|GET Request Success Rate| |74.617%| |
+|Successful POST Request Number| |163533| |
+|Failed POST Request Number| |36467| |
+|POST Request Success Rate| |81.767%| |
+|Overall Request Success Rate| |78.192%| |
+|GET Mean Latency| |78.815655| |
+|POST Mean Latency| |111.683405| |
+|GET Min Latency| |16| |
+|POST Min Latency| |25| |
+|GET Max Latency| |15211| |
+|POST Max Latency| |15361| |
+|GET 50th Percentile| |64.0| |
+|POST 50th Percentile| |91.0| |
+|GET 99th Percentile| |274.0| |
+|POST 99th Percentile| |391.0| |
+
+
 
 ## 4. Optimized Server Configuration
