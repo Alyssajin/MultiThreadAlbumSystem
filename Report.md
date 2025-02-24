@@ -38,7 +38,6 @@ We used a thread group size of 10 and delay time 2 seconds.
 |GET 99th Percentile| 167.0|480.0| 1123.0|
 |POST 99th Percentile|313.0 |465.0| 1142.0|
 
-![My Image](charts/SingleServer.png)
 
 ## 3. Two Load Balanced Servers
 We used a thread group size of 10 and delay time 2 seconds. 
@@ -64,6 +63,19 @@ We used a thread group size of 10 and delay time 2 seconds.
 |GET 99th Percentile| 182.0|274.0| 1062.0|
 |POST 99th Percentile|433.0 |391.0| 1140.0|
 
-![My Image](charts/LoadBalancedServer.png)
 
 ## 4. Optimized Server Configuration
+
+## 5. Comparisons
+
+### Single Server vs. Load Balanced Servers
+
+Comparing throughput-across-time charts below, we notice load balanced servers have the following advantages:
+- Higher throughput
+- More stability in throughput
+- Scalability with increasing load
+- Smoother decline at the end
+
+![My Image](charts/SingleServer.png)
+
+![My Image](charts/LoadBalancedServer.png)
