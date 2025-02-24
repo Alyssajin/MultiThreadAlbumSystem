@@ -103,7 +103,7 @@ Our current assumption is that the bottleneck in the load-balanced setup stems f
 
 ![My Image](charts/Single-Load-MeanLatency.png)
 
-![My Image](charts/50Latency update.png)
+![My Image](charts/50Latency\ update.png)
 
 ![My Image](charts/Single-Load-P99Latency.png)
 
