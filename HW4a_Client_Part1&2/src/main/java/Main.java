@@ -116,8 +116,8 @@ public class Main {
       int getFails = ClientGet.getFailCount();
       System.out.println("Number of successful GET requests: " + getSuccesses);
       System.out.println("Number of failed GET requests: " + getFails);
-      System.out.println("Number of successful requests: " + postSuccesses);
-      System.out.println("Number of failed requests: " + postFails);
+      System.out.println("Number of successful POST requests: " + postSuccesses);
+      System.out.println("Number of failed POST requests: " + postFails);
 
     } catch (Exception e) {
       e.printStackTrace();
