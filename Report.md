@@ -97,7 +97,7 @@ Observation towards **success rate** comparison:
 - As load increases, success rate drops for both setups.
 - However, load balanced server handles heavy stress better and maintains higher success rates than the single server.
   
-![My Image](charts/Single-Load-SuccessRate.png)
+![My Image](charts/SuccessRateupdate.png)
 
 Regarding **request latency**, we observed load-balanced servers
 - improve performance for GET requests, but
