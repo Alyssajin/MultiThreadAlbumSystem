@@ -75,9 +75,9 @@ Below are our ALB setups.
 
 ## 4. Optimized Server Configuration
 
-We increased the thread connection pool between client and server. In the meantime, we decreased the connection count between server and database to 40. From our output, we noticed that the throughput reaches a peak when the connection pool size is 200. However, as we increase the pool size, throughput and system reliability (represented by request success rate) do not increase as we expected. Also, we noticed that changing connection pool size does not bring any significant increase to throughput compared to previous load balanced servers we used. 
+We increased the thread connection pool between the client and server while reducing the connection count between the server and database to 40. Based on our results, throughput peaked when the connection pool size reached 200. However, further increasing the pool size did not lead to additional improvements in throughput or system reliability (as measured by request success rate), contrary to our expectations.
 
-Rather, it increases the request success rate, which proves that system reliability increases.
+Additionally, we observed that reducing the connection count between the server and the database significantly increased the request success rate. In our previous tests, the Go server allowed unlimited connections, while the database had a fixed connection limit, causing a large number of requests to go unanswered. By limiting the server's connections to match the database's capacity, we mitigated this issue, leading to improved system reliability.
 
 ![My Image](charts/differentconnections.png)
 
@@ -125,6 +125,9 @@ Our current assumption is that the bottleneck in the load-balanced setup stems f
 ![My Image](charts/99thLatency%20Update.png)
 
 ### Load Balanced Servers vs. Optimized Load Balanced Servers
+
+The biggest improvement our optimization made is in increasing the request success rate.
+
 
 
 ## 6. Future Work
