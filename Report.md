@@ -128,7 +128,7 @@ Our current assumption is that the bottleneck in the load-balanced setup stems f
 
 The biggest improvement our optimization made is in increasing the request success rate.
 
-As shown in the chart below, after optimization (limit server connection to 40), request success rate increases from 65.4% to 94%, which increases by **43.7%**.
+We calculated the total success rate of a single server, load balanced server, and our optimized load balanced server. We were using the same thread group size of 10, delay time of 2 seconds, and number of thread groups of 30. As shown in the chart below, after optimization (limit server connection to 40), request success rate increases from 65.4% to 94%, which increases by **43.7%**.
 
 ![My Image](charts/sucessratenew.png)
 
