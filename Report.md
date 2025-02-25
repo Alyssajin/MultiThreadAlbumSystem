@@ -75,6 +75,12 @@ Below are our ALB setups.
 
 ## 4. Optimized Server Configuration
 
+We increased the thread connection pool between client and server. In the meantime, we decreased the connection count between server and database to 40. From our output, we noticed that the throughput reaches a peak when the connection pool size is 200. However, as we increase the pool size, throughput and system reliability (represented by request success rate) do not increase as we expected. Also, we noticed that changing connection pool size does not bring any significant increase to throughput compared to previous load balanced servers we used. 
+
+Rather, it increases the request success rate, which proves that system reliability increases.
+
+![My Image](charts/differentconnections.png)
+
 ## 5. Comparisons
 
 We compared throughput, CPU utilization, success rate, and request latency of different configurations.
@@ -117,6 +123,9 @@ Our current assumption is that the bottleneck in the load-balanced setup stems f
 ![My Image](charts/50Latency%20update.png)
 
 ![My Image](charts/99thLatency%20Update.png)
+
+### Load Balanced Servers vs. Optimized Load Balanced Servers
+
 
 ## 6. Future Work
 
