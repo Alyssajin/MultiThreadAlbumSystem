@@ -130,7 +130,7 @@ The biggest improvement our optimization made is in increasing the request succe
 
 As shown in the chart below, after optimization (limit server connection to 40), request success rate increases from 65.4% to 94%, which increases by **43.7%**.
 
-![My Image](charts/successratenew.png)
+![My Image](charts/sucessratenew.png)
 
 ## 6. Future Work
 
