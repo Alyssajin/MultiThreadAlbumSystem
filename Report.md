@@ -41,6 +41,15 @@ We used a thread group size of 10 and delay time 2 seconds.
 
 ## 3. Two Load Balanced Servers
 We used a thread group size of 10 and delay time 2 seconds. 
+
+Below are our ALB setups.
+
+![My Image](charts/alb1.jpeg)
+
+![My Image](charts/alb2.jpeg)
+
+![My Image](charts/alb3.jpeg)
+
 |Configuration|Load Balanced Server - numThreadGroups 10|Load Balanced Server - numThreadGroups 20|Load Balanced Server -numThreadGroups 30|
 |-----------------------------|----------|----------|----------|
 |Wall Time(s)                 | 192      |       232|   331     |
