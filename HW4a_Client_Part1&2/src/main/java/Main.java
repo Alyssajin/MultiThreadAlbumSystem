@@ -10,8 +10,8 @@ import java.util.concurrent.TimeoutException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.vavr.CheckedFunction0;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -51,7 +51,13 @@ public class Main {
 
     CircuitBreaker circuitBreaker = CircuitBreaker.of("myCircuitBreaker", circuitBreakerConfig);
 
+    RetryConfig config = RetryConfig.custom()
+            .maxAttempts(3)
+            .waitDuration(Duration.ofMillis(100))
+            .retryExceptions(IOException.class, TimeoutException.class)
+            .build();
 
+    Retry retry = Retry.of("myRetry", config);
 
     try {
       SparkSession spark =
@@ -69,6 +75,11 @@ public class Main {
       Runnable decoratedGet = CircuitBreaker.decorateRunnable(circuitBreaker, clientGet);
       Runnable decoratedPost = CircuitBreaker.decorateRunnable(circuitBreaker, clientPost);
 
+      // Decorate the clientGet and clientPost with Retry
+      Runnable retryGet = Retry.decorateRunnable(retry, decoratedGet);
+      Runnable retryPost = Retry.decorateRunnable(retry, decoratedPost);
+
+
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
 
       CountDownLatch completed2 = new CountDownLatch(totalThreads);
@@ -78,12 +89,12 @@ public class Main {
           Runnable thread = () -> {
             for (int k = 0; k < 1; k++) {
               try {
-                decoratedGet.run();
+                retryGet.run();
               } catch (CallNotPermittedException e) {
                 System.out.println("Circuit is OPEN. GET request failed");
               }
               try {
-                decoratedPost.run();
+                retryPost.run();
               } catch (CallNotPermittedException e) {
                 System.out.println("Circuit is OPEN. POST request failed");
               }
