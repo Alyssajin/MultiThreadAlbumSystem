@@ -34,6 +34,11 @@
             <artifactId>spark-sql_2.12</artifactId>
             <version>3.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-circuitbreaker</artifactId>
+            <version>1.7.0</version>
+        </dependency>
     </dependencies>
 
 

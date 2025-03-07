@@ -1,9 +1,17 @@
 import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.vavr.CheckedFunction0;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -31,6 +39,20 @@ public class Main {
     CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager)
             .setRetryStrategy(new DefaultHttpRequestRetryStrategy(5, TimeValue.ofSeconds(2))).build();
 
+    CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+            .failureRateThreshold(50)
+            .slowCallRateThreshold(50)
+            .waitDurationInOpenState(Duration.ofMillis(1000))
+            .slowCallDurationThreshold(Duration.ofSeconds(2))
+            .permittedNumberOfCallsInHalfOpenState(3)
+            .minimumNumberOfCalls(10)
+            .recordExceptions(IOException.class, TimeoutException.class)
+            .build();
+
+    CircuitBreaker circuitBreaker = CircuitBreaker.of("myCircuitBreaker", circuitBreakerConfig);
+
+
+
     try {
       SparkSession spark =
               SparkSession.builder().appName("data").config("spark.master", "local").getOrCreate();
@@ -43,19 +65,9 @@ public class Main {
       ClientGet clientGet = new ClientGet(IPAddr, client, list);
       ClientPost clientPost = new ClientPost(IPAddr, client, list, file);
 
-//      CountDownLatch completed = new CountDownLatch(10);
-//      for (int i = 0; i < 10; i++) {
-//        Runnable thread = () -> {
-//          for (int j = 0; j < 100; j++) {
-//            clientGet.run();
-//            clientPost.run();
-//          }
-//          completed.countDown();
-//        };
-//        new Thread(thread).start();
-//      }
-//
-//      completed.await();
+      // Decorate the clientGet and clientPost with CircuitBreaker
+      Runnable decoratedGet = CircuitBreaker.decorateRunnable(circuitBreaker, clientGet);
+      Runnable decoratedPost = CircuitBreaker.decorateRunnable(circuitBreaker, clientPost);
 
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
 
@@ -65,14 +77,22 @@ public class Main {
         for (int i = 0; i < GROUP_SIZE; i++) {
           Runnable thread = () -> {
             for (int k = 0; k < 1; k++) {
-              clientGet.run();
-              clientPost.run();
+              try {
+                decoratedGet.run();
+              } catch (CallNotPermittedException e) {
+                System.out.println("Circuit is OPEN. GET request failed");
+              }
+              try {
+                decoratedPost.run();
+              } catch (CallNotPermittedException e) {
+                System.out.println("Circuit is OPEN. POST request failed");
+              }
+//              clientGet.run();
+//              clientPost.run();
             }
             completed2.countDown();
-            //System.out.println("Thread completed");
           };
           new Thread(thread).start();
-          //System.out.println("Thread started");
         }
         if (j != NUMBER_OF_GROUPS - 1) {
           Thread.sleep(DELAY * 1000);
