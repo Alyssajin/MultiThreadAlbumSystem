@@ -24,11 +24,12 @@ import org.apache.spark.sql.types.StructType;
 
 // Delete data.csv folder each time before running the program
 public class Main {
-  private static final int GROUP_SIZE = 10;
-  private static final int NUMBER_OF_GROUPS = 10;
+  private static final int GROUP_SIZE = 1;
+  private static final int NUMBER_OF_GROUPS = 1;
   private static final int DELAY = 2;
   // IP address of the java servlet server
-  private static final String IPAddr = "demo-alb-1739993920.us-west-2.elb.amazonaws.com";
+//  private static final String IPAddr = "demo-alb-1739993920.us-west-2.elb.amazonaws.com";
+//  private static final String IPAddr = "localhost:8082";
   private static final String FILE_PATH = "/Users/nuanxin/Desktop/Example.jpg";
 
   public static void main(String[] args) {
@@ -60,25 +61,14 @@ public class Main {
     Retry retry = Retry.of("myRetry", config);
 
     try {
-      SparkSession spark =
-              SparkSession.builder().appName("data").config("spark.master", "local").getOrCreate();
-      spark.sparkContext().setLogLevel("ERROR");
-      StructType schema =
-              new StructType().add("start", "long").add("requestType", "string").add("latency", "long")
-                      .add("code", "integer");
+//      SparkSession spark =
+//              SparkSession.builder().appName("data").config("spark.master", "local").getOrCreate();
+//      spark.sparkContext().setLogLevel("ERROR");
+//      StructType schema =
+//              new StructType().add("start", "long").add("requestType", "string").add("latency", "long")
+//                      .add("code", "integer");
       List<Row> list = Collections.synchronizedList(new ArrayList<>());
-      File file = new File(FILE_PATH);
-      ClientGet clientGet = new ClientGet(IPAddr, client, list);
-      ClientPost clientPost = new ClientPost(IPAddr, client, list, file);
-
-      // Decorate the clientGet and clientPost with CircuitBreaker
-      Runnable decoratedGet = CircuitBreaker.decorateRunnable(circuitBreaker, clientGet);
-      Runnable decoratedPost = CircuitBreaker.decorateRunnable(circuitBreaker, clientPost);
-
-      // Decorate the clientGet and clientPost with Retry
-      Runnable retryGet = Retry.decorateRunnable(retry, decoratedGet);
-      Runnable retryPost = Retry.decorateRunnable(retry, decoratedPost);
-
+//      File file = new File(FILE_PATH);
 
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
 
@@ -86,15 +76,25 @@ public class Main {
       long start = System.currentTimeMillis();
       for (int j = 0; j < NUMBER_OF_GROUPS; j++) {
         for (int i = 0; i < GROUP_SIZE; i++) {
+
           Runnable thread = () -> {
+                  File file = new File(FILE_PATH);
+            ClientGetKafka clientGetKafka = new ClientGetKafka(1);
+//            ClientGetKafka clientGetKafka = new ClientGetKafka("localhost:9092", "album-get", list, "1");
+            ClientPostKafka clientPostKafka = new ClientPostKafka("localhost:9092", "album-post", list, file);
+            Runnable decoratedGet = CircuitBreaker.decorateRunnable(circuitBreaker, clientGetKafka);
+            Runnable decoratedPost = CircuitBreaker.decorateRunnable(circuitBreaker, clientPostKafka);
+            Runnable retryGet = Retry.decorateRunnable(retry, decoratedGet);
+            Runnable retryPost = Retry.decorateRunnable(retry, decoratedPost);
+
             for (int k = 0; k < 1; k++) {
               try {
-                retryGet.run();
+                clientGetKafka.run();
               } catch (CallNotPermittedException e) {
                 System.out.println("Circuit is OPEN. GET request failed");
               }
               try {
-                retryPost.run();
+                clientPostKafka.run();
               } catch (CallNotPermittedException e) {
                 System.out.println("Circuit is OPEN. POST request failed");
               }
@@ -112,43 +112,43 @@ public class Main {
       completed2.await();
 
       long end = System.currentTimeMillis();
-      Dataset<Row> data = spark.createDataFrame(list, schema);
+//      Dataset<Row> data = spark.createDataFrame(list, schema);
       //data.show();
-      Dataset<Row> getMean = data.filter("requestType == 'GET'").groupBy().avg("latency");
-      Dataset<Row> postMean = data.filter("requestType == 'POST'").groupBy().avg("latency");
-      Dataset<Row> getMin = data.filter("requestType == 'GET'").groupBy().min("latency");
-      Dataset<Row> postMin = data.filter("requestType == 'POST'").groupBy().min("latency");
-      Dataset<Row> getMax = data.filter("requestType == 'GET'").groupBy().max("latency");
-      Dataset<Row> postMax = data.filter("requestType == 'POST'").groupBy().max("latency");
-      double[] get5099 = data.filter("requestType == 'GET'").stat()
-              .approxQuantile("latency", new double[] {0.5, 0.99}, 0);
-      double[] post5099 = data.filter("requestType == 'POST'").stat()
-              .approxQuantile("latency", new double[] {0.5, 0.99}, 0);
-      System.out.println("GET Mean Latency: " + getMean.first().getDouble(0));
-      System.out.println("POST Mean Latency: " + postMean.first().getDouble(0));
-      System.out.println("GET Min Latency: " + getMin.first().getLong(0));
-      System.out.println("POST Min Latency: " + postMin.first().getLong(0));
-      System.out.println("GET Max Latency: " + getMax.first().getLong(0));
-      System.out.println("POST Max Latency: " + postMax.first().getLong(0));
-      System.out.println("GET 50th Percentile: " + get5099[0]);
-      System.out.println("POST 50th Percentile: " + post5099[0]);
-      System.out.println("GET 99th Percentile: " + get5099[1]);
-      System.out.println("POST 99th Percentile: " + post5099[1]);
-      data.write().format("csv").save("data.csv");
-      spark.stop();
+//      Dataset<Row> getMean = data.filter("requestType == 'GET'").groupBy().avg("latency");
+//      Dataset<Row> postMean = data.filter("requestType == 'POST'").groupBy().avg("latency");
+//      Dataset<Row> getMin = data.filter("requestType == 'GET'").groupBy().min("latency");
+//      Dataset<Row> postMin = data.filter("requestType == 'POST'").groupBy().min("latency");
+//      Dataset<Row> getMax = data.filter("requestType == 'GET'").groupBy().max("latency");
+//      Dataset<Row> postMax = data.filter("requestType == 'POST'").groupBy().max("latency");
+//      double[] get5099 = data.filter("requestType == 'GET'").stat()
+//              .approxQuantile("latency", new double[] {0.5, 0.99}, 0);
+//      double[] post5099 = data.filter("requestType == 'POST'").stat()
+//              .approxQuantile("latency", new double[] {0.5, 0.99}, 0);
+//      System.out.println("GET Mean Latency: " + getMean.first().getDouble(0));
+//      System.out.println("POST Mean Latency: " + postMean.first().getDouble(0));
+//      System.out.println("GET Min Latency: " + getMin.first().getLong(0));
+//      System.out.println("POST Min Latency: " + postMin.first().getLong(0));
+//      System.out.println("GET Max Latency: " + getMax.first().getLong(0));
+//      System.out.println("POST Max Latency: " + postMax.first().getLong(0));
+//      System.out.println("GET 50th Percentile: " + get5099[0]);
+//      System.out.println("POST 50th Percentile: " + post5099[0]);
+//      System.out.println("GET 99th Percentile: " + get5099[1]);
+//      System.out.println("POST 99th Percentile: " + post5099[1]);
+//      data.write().format("csv").save("data.csv");
+//      spark.stop();
       System.out.println("Time taken: " + (end - start) / 1000 + "s");
-      System.out.println(
-              "Throughput: " + ((totalThreads * 2000)) / ((end - start) / 1000) +
-                      " requests/s");
+//      System.out.println(
+//              "Throughput: " + ((totalThreads * 2000)) / ((end - start) / 1000) +
+//                      " requests/s");
 
-      int postSuccesses = ClientPost.getSuccessCount();
-      int postFails = ClientPost.getFailCount();
-      int getSuccesses = ClientGet.getSuccessCount();
-      int getFails = ClientGet.getFailCount();
-      System.out.println("Number of successful GET requests: " + getSuccesses);
-      System.out.println("Number of failed GET requests: " + getFails);
-      System.out.println("Number of successful POST requests: " + postSuccesses);
-      System.out.println("Number of failed POST requests: " + postFails);
+//      int postSuccesses = ClientPost.getSuccessCount();
+//      int postFails = ClientPost.getFailCount();
+//      int getSuccesses = ClientGet.getSuccessCount();
+//      int getFails = ClientGet.getFailCount();
+//      System.out.println("Number of successful GET requests: " + getSuccesses);
+//      System.out.println("Number of failed GET requests: " + getFails);
+//      System.out.println("Number of successful POST requests: " + postSuccesses);
+//      System.out.println("Number of failed POST requests: " + postFails);
 
     } catch (Exception e) {
       e.printStackTrace();
