@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -29,7 +24,7 @@ public class Main {
   private static final int DELAY = 2;
   // IP address of the java servlet server
 //  private static final String IPAddr = "demo-alb-1739993920.us-west-2.elb.amazonaws.com";
-//  private static final String IPAddr = "localhost:8082";
+  private static final String IPAddr = "localhost:8082";
   private static final String FILE_PATH = "/Users/nuanxin/Desktop/Example.jpg";
 
   public static void main(String[] args) {
@@ -40,25 +35,6 @@ public class Main {
     CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager)
             .setRetryStrategy(new DefaultHttpRequestRetryStrategy(5, TimeValue.ofSeconds(2))).build();
 
-    CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-            .failureRateThreshold(50)
-            .slowCallRateThreshold(50)
-            .waitDurationInOpenState(Duration.ofMillis(1000))
-            .slowCallDurationThreshold(Duration.ofSeconds(2))
-            .permittedNumberOfCallsInHalfOpenState(3)
-            .minimumNumberOfCalls(10)
-            .recordExceptions(IOException.class, TimeoutException.class)
-            .build();
-
-    CircuitBreaker circuitBreaker = CircuitBreaker.of("myCircuitBreaker", circuitBreakerConfig);
-
-    RetryConfig config = RetryConfig.custom()
-            .maxAttempts(3)
-            .waitDuration(Duration.ofMillis(100))
-            .retryExceptions(IOException.class, TimeoutException.class)
-            .build();
-
-    Retry retry = Retry.of("myRetry", config);
 
     try {
 //      SparkSession spark =
@@ -68,7 +44,9 @@ public class Main {
 //              new StructType().add("start", "long").add("requestType", "string").add("latency", "long")
 //                      .add("code", "integer");
       List<Row> list = Collections.synchronizedList(new ArrayList<>());
-//      File file = new File(FILE_PATH);
+      File file = new File(FILE_PATH);
+        ClientGet clientGet = new ClientGet(IPAddr, client, list);
+        ClientPost clientPost = new ClientPost(IPAddr, client, list, file);
 
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
 
@@ -78,28 +56,10 @@ public class Main {
         for (int i = 0; i < GROUP_SIZE; i++) {
 
           Runnable thread = () -> {
-                  File file = new File(FILE_PATH);
-            ClientGetKafka clientGetKafka = new ClientGetKafka(1);
-//            ClientGetKafka clientGetKafka = new ClientGetKafka("localhost:9092", "album-get", list, "1");
-            ClientPostKafka clientPostKafka = new ClientPostKafka("localhost:9092", "album-post", list, file);
-            Runnable decoratedGet = CircuitBreaker.decorateRunnable(circuitBreaker, clientGetKafka);
-            Runnable decoratedPost = CircuitBreaker.decorateRunnable(circuitBreaker, clientPostKafka);
-            Runnable retryGet = Retry.decorateRunnable(retry, decoratedGet);
-            Runnable retryPost = Retry.decorateRunnable(retry, decoratedPost);
 
             for (int k = 0; k < 1; k++) {
-              try {
-                clientGetKafka.run();
-              } catch (CallNotPermittedException e) {
-                System.out.println("Circuit is OPEN. GET request failed");
-              }
-              try {
-                clientPostKafka.run();
-              } catch (CallNotPermittedException e) {
-                System.out.println("Circuit is OPEN. POST request failed");
-              }
-//              clientGet.run();
-//              clientPost.run();
+              clientGet.run();
+              clientPost.run();
             }
             completed2.countDown();
           };
