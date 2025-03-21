@@ -25,14 +25,16 @@ public class ClientReview implements Runnable{
   private final List<Row> data;
   private final Like like;
   private final String albumId;
+  private final int port;
 
   public ClientReview(String IPAddr, CloseableHttpClient client, List<Row> data,
-                      Like like, String albumId) {
+                      Like like, String albumId, int port) {
     this.client = client;
     this.albumId = albumId;
     this.IPAddr = IPAddr;
     this.data = data;
     this.like = like;
+    this.port = port;
   }
 
   @Override
@@ -42,9 +44,10 @@ public class ClientReview implements Runnable{
       URI uri = new URIBuilder()
               .setScheme("http")
               .setHost(IPAddr)
-              .setPath("/" + like + "/" + albumId)
+              .setPort(port)
+              .setPath("/album/" + like + "/" + albumId)
               .build();
-
+      System.out.println(uri);
       List<NameValuePair> params = new ArrayList<NameValuePair>(2);
       params.add(new BasicNameValuePair("albumId", albumId));
       params.add(new BasicNameValuePair("like", like.toString()));

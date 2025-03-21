@@ -24,7 +24,8 @@ public class Main {
   private static final int DELAY = 2;
   // IP address of the java servlet server
 //  private static final String IPAddr = "demo-alb-1739993920.us-west-2.elb.amazonaws.com";
-  private static final String IPAddr = "localhost:8082";
+  private static final String IPAddr = "localhost";
+  private static final int port = 8082;
   private static final String FILE_PATH = "/Users/nuanxin/Desktop/Example.jpg";
 
   public static void main(String[] args) {
@@ -45,9 +46,9 @@ public class Main {
 //                      .add("code", "integer");
       List<Row> list = Collections.synchronizedList(new ArrayList<>());
       File file = new File(FILE_PATH);
-        ClientGet clientGet = new ClientGet(IPAddr, client, list);
-        ClientPost clientPost = new ClientPost(IPAddr, client, list, file);
-        ClientReview clientReview = new ClientReview(IPAddr, client, list, Like.like, "1");
+        ClientGet clientGet = new ClientGet(IPAddr, port, client, list);
+        ClientPost clientPost = new ClientPost(IPAddr, port, client, list, file);
+        ClientReview clientReview = new ClientReview(IPAddr, client, list, Like.like, "1", port);
 
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
 

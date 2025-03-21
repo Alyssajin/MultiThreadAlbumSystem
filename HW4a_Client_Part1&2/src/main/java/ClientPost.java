@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,20 +14,23 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 
 public class ClientPost implements Runnable {
   private static AtomicInteger successCount = new AtomicInteger(0);
   private static AtomicInteger failCount = new AtomicInteger(0);
-  private String postUrl;
   private CloseableHttpClient client;
   private List<Row> data;
   private File file;
+  private final int port;
+  private final String IPAddr;
 
 
-  public ClientPost(String IPAddr, CloseableHttpClient client, List<Row> data, File file) {
-    this.postUrl = "http://" + IPAddr + "/album";
+  public ClientPost(String IPAddr, int port, CloseableHttpClient client, List<Row> data, File file) {
+    this.IPAddr = IPAddr;
+    this.port = port;
     this.client = client;
     this.data = data;
     this.file = file;
@@ -56,20 +61,26 @@ public class ClientPost implements Runnable {
 
     HttpEntity entity = builder.build();
 
-    // Create a post method instance.
-    HttpPost postMethod = new HttpPost(postUrl);
-
 
     // Provide custom retry handler is necessary
     /*postMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
         new DefaultHttpMethodRetryHandler(5, true));
     */
     try {
+      URI uri = new URIBuilder()
+              .setScheme("http")
+              .setHost(IPAddr)
+              .setPort(port)
+              .setPath("/album")
+              .build();
+
+      // Create a post method instance.
+      HttpPost postMethod = new HttpPost(uri);
       postMethod.setEntity(entity);
+
       long start = System.currentTimeMillis();
       CloseableHttpResponse response = client.execute(postMethod);
       //postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
-
 
       int statusCode = response.getCode();
       // Distinguish success vs failure
@@ -96,6 +107,8 @@ public class ClientPost implements Runnable {
     } catch (IOException e) {
       System.err.println("Fatal transport error: " + e.getMessage());
       e.printStackTrace();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
     }
   }
 

@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,28 +18,27 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 
 public class ClientGet implements Runnable {
   private static AtomicInteger successCount = new AtomicInteger(0);
   private static AtomicInteger failCount = new AtomicInteger(0);
-
-  private String getUrl;
   private CloseableHttpClient client;
   private List<Row> data;
+  private final int port;
+  private final String IPAddr;
 
-  public ClientGet(String IPAddr, CloseableHttpClient client, List<Row> data) {
-    this.getUrl = "http://" + IPAddr + "/album/1";
+  public ClientGet(String IPAddr, int port, CloseableHttpClient client, List<Row> data) {
+    this.IPAddr = IPAddr;
+    this.port = port;
     this.client = client;
     this.data = data;
   }
 
   // stolen from https://hc.apache.org/httpclient-legacy/tutorial.html
   public void run() {
-
-    // Create a method instance.
-    HttpGet getMethod = new HttpGet(getUrl);
 
     // Create a post method instance.
 
@@ -47,6 +48,15 @@ public class ClientGet implements Runnable {
         new DefaultHttpMethodRetryHandler(5, false));
      */
     try {
+      URI uri = new URIBuilder()
+              .setScheme("http")
+              .setHost(IPAddr)
+              .setPort(port)
+              .setPath("/album/1")
+              .build();
+      // Create a method instance.
+      HttpGet getMethod = new HttpGet(uri);
+
       long start = System.currentTimeMillis();
       System.out.println("GET START: " + start + Thread.currentThread().getName());
       // Execute the method.
@@ -70,6 +80,8 @@ public class ClientGet implements Runnable {
       data.add(RowFactory.create(start, "GET", latency, statusCode));
 
     } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
   }
