@@ -47,6 +47,7 @@ public class Main {
       File file = new File(FILE_PATH);
         ClientGet clientGet = new ClientGet(IPAddr, client, list);
         ClientPost clientPost = new ClientPost(IPAddr, client, list, file);
+        ClientReview clientReview = new ClientReview(IPAddr, client, list, Like.like, "1");
 
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
 
@@ -57,9 +58,10 @@ public class Main {
 
           Runnable thread = () -> {
 
-            for (int k = 0; k < 1; k++) {
-              clientGet.run();
-              clientPost.run();
+            for (int k = 0; k < 10; k++) {
+              clientReview.run();
+//              clientGet.run();
+//              clientPost.run();
             }
             completed2.countDown();
           };
