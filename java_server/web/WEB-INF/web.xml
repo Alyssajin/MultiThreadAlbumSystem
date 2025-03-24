@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
     <servlet>
-        <servlet-name>Server</servlet-name>
+        <servlet-name>album</servlet-name>
         <servlet-class>Server</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>Server</servlet-name>
-        <url-pattern>/Server/*</url-pattern>
+        <servlet-name>album</servlet-name>
+        <url-pattern>/album/*</url-pattern>
     </servlet-mapping>
     <filter>
         <filter-name>javamelody</filter-name>

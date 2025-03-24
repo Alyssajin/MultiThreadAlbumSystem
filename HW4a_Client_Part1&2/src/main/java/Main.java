@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -19,23 +18,21 @@ import org.apache.spark.sql.types.StructType;
 
 // Delete data.csv folder each time before running the program
 public class Main {
-  private static final int GROUP_SIZE = 1;
-  private static final int NUMBER_OF_GROUPS = 1;
+  private static final int GROUP_SIZE = 10;
+  private static final int NUMBER_OF_GROUPS = 10;
   private static final int DELAY = 2;
-  // IP address of the java servlet server
 //  private static final String IPAddr = "demo-alb-1739993920.us-west-2.elb.amazonaws.com";
   private static final String IPAddr = "localhost";
-  private static final int port = 8082;
+  private static final int port = 8084;
   private static final String FILE_PATH = "/Users/nuanxin/Desktop/Example.jpg";
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException, TimeoutException {
+
     PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
     connectionManager.setMaxTotal(1000);
     connectionManager.setDefaultMaxPerRoute(1000);
-
     CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager)
             .setRetryStrategy(new DefaultHttpRequestRetryStrategy(5, TimeValue.ofSeconds(2))).build();
-
 
     try {
 //      SparkSession spark =
@@ -46,23 +43,20 @@ public class Main {
 //                      .add("code", "integer");
       List<Row> list = Collections.synchronizedList(new ArrayList<>());
       File file = new File(FILE_PATH);
-        ClientGet clientGet = new ClientGet(IPAddr, port, client, list);
+//        ClientGet clientGet = new ClientGet(IPAddr, port, client, list);
         ClientPost clientPost = new ClientPost(IPAddr, port, client, list, file);
         ClientReview clientReview = new ClientReview(IPAddr, client, list, Like.like, "1", port);
 
       int totalThreads = GROUP_SIZE * NUMBER_OF_GROUPS;
-
       CountDownLatch completed2 = new CountDownLatch(totalThreads);
       long start = System.currentTimeMillis();
       for (int j = 0; j < NUMBER_OF_GROUPS; j++) {
         for (int i = 0; i < GROUP_SIZE; i++) {
-
           Runnable thread = () -> {
-
-            for (int k = 0; k < 10; k++) {
-              clientReview.run();
+            for (int k = 0; k < 100; k++) {
 //              clientGet.run();
-//              clientPost.run();
+              clientPost.run();
+              clientReview.run();
             }
             completed2.countDown();
           };
@@ -100,9 +94,9 @@ public class Main {
 //      data.write().format("csv").save("data.csv");
 //      spark.stop();
       System.out.println("Time taken: " + (end - start) / 1000 + "s");
-//      System.out.println(
-//              "Throughput: " + ((totalThreads * 2000)) / ((end - start) / 1000) +
-//                      " requests/s");
+      System.out.println(
+              "Throughput: " + (totalThreads) * 100 / ((end - start) / 1000) +
+                      " requests/s");
 
 //      int postSuccesses = ClientPost.getSuccessCount();
 //      int postFails = ClientPost.getFailCount();
@@ -112,7 +106,6 @@ public class Main {
 //      System.out.println("Number of failed GET requests: " + getFails);
 //      System.out.println("Number of successful POST requests: " + postSuccesses);
 //      System.out.println("Number of failed POST requests: " + postFails);
-
     } catch (Exception e) {
       e.printStackTrace();
     }
