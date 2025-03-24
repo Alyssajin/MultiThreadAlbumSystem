@@ -94,8 +94,7 @@ public class Main {
 //      data.write().format("csv").save("data.csv");
 //      spark.stop();
       System.out.println("Time taken: " + (end - start) / 1000 + "s");
-      System.out.println(
-              "Throughput: " + (totalThreads) * 100 / ((end - start) / 1000) +
+      System.out.println("Throughput: " + (totalThreads) * 200 / ((end - start) / 1000) +
                       " requests/s");
 
 //      int postSuccesses = ClientPost.getSuccessCount();

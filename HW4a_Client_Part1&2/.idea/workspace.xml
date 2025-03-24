@@ -11,8 +11,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5433b99f-dc6f-4fcd-9e64-aea5520d2eae" name="Changes" comment="feat: refactor Client classes to use dynamic port configuration and update server URL mappings">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../go_server/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../go_server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +127,7 @@
       <workItem from="1741320820132" duration="3887000" />
       <workItem from="1741383938459" duration="36078000" />
       <workItem from="1742582332431" duration="4838000" />
-      <workItem from="1742596729125" duration="29728000" />
+      <workItem from="1742596729125" duration="30822000" />
     </task>
     <task id="LOCAL-00001" summary="feat: add resilience4j circuit breaker for improved error handling and fault tolerance">
       <option name="closed" value="true" />
@@ -203,5 +203,16 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Main.java</url>
+          <line>43</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
