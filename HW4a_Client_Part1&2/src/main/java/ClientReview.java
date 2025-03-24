@@ -1,19 +1,14 @@
-import org.apache.hadoop.shaded.org.apache.http.Consts;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.EntityBuilder;
-import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,17 +18,17 @@ public class ClientReview implements Runnable{
   private final String IPAddr;
   private final CloseableHttpClient client;
   private final List<Row> data;
-  private final Like like;
+  private final Like likeOrNot;
   private final String albumId;
   private final int port;
 
   public ClientReview(String IPAddr, CloseableHttpClient client, List<Row> data,
-                      Like like, String albumId, int port) {
+                      Like likeOrNot, String albumId, int port) {
     this.client = client;
     this.albumId = albumId;
     this.IPAddr = IPAddr;
     this.data = data;
-    this.like = like;
+    this.likeOrNot = likeOrNot;
     this.port = port;
   }
 
@@ -45,16 +40,11 @@ public class ClientReview implements Runnable{
               .setScheme("http")
               .setHost(IPAddr)
               .setPort(port)
-              .setPath("/album/" + like + "/" + albumId)
+              .setPath("/album/" + likeOrNot + "/" + albumId)
               .build();
-      System.out.println(uri);
-      List<NameValuePair> params = new ArrayList<NameValuePair>(2);
-      params.add(new BasicNameValuePair("albumId", albumId));
-      params.add(new BasicNameValuePair("like", like.toString()));
 
       HttpPost postMethod = new HttpPost(uri);
-      postMethod.setEntity(new UrlEncodedFormEntity(params, Consts.UTF_8));
-      System.out.println(params);
+//      long start = System.currentTimeMillis();
 
       CloseableHttpResponse response = client.execute(postMethod);
       if (response.getCode() >= 200 && response.getCode() < 300) {
@@ -62,6 +52,10 @@ public class ClientReview implements Runnable{
       } else {
         failCount.incrementAndGet();
       }
+
+//      long latency = System.currentTimeMillis() - start;
+//      int statusCode = response.getCode();
+//      data.add(RowFactory.create(start, "POST", latency, statusCode));
 
       EntityUtils.consume(response.getEntity());
 

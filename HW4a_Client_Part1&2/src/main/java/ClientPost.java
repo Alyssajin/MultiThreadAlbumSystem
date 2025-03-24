@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
@@ -12,7 +11,6 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.spark.sql.Row;
@@ -40,67 +38,44 @@ public class ClientPost implements Runnable {
   public void run() {
     long starttime = System.currentTimeMillis();
     System.out.println("POST START: " + starttime + Thread.currentThread().getName());
+
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
     builder.setMode(HttpMultipartMode.STRICT);
-
-    // 1. Add the file part
     builder.addBinaryBody(
             "image",
             file,
             ContentType.IMAGE_JPEG,
             "Example.jpg"
     );
-
-    // 2. Add the profile field as a single JSON string
-    // Example JSON: {"artist":"AgustD","title":"D-Day","year":"2023"}
-    // Modify these values or pass them in as parameters if needed
     String jsonProfile = "{\"artist\":\"AgustD\",\"title\":\"D-Day\",\"year\":\"2023\"}";
-
-    // Add the 'profile' field with JSON content
     builder.addTextBody("profile", jsonProfile, ContentType.APPLICATION_JSON);
-
     HttpEntity entity = builder.build();
 
-
-    // Provide custom retry handler is necessary
-    /*postMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
-        new DefaultHttpMethodRetryHandler(5, true));
-    */
     try {
+      long start = System.currentTimeMillis();
       URI uri = new URIBuilder()
               .setScheme("http")
               .setHost(IPAddr)
               .setPort(port)
               .setPath("/album")
               .build();
-
-      // Create a post method instance.
       HttpPost postMethod = new HttpPost(uri);
       postMethod.setEntity(entity);
-
-      long start = System.currentTimeMillis();
       CloseableHttpResponse response = client.execute(postMethod);
-      //postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
-
       int statusCode = response.getCode();
-      // Distinguish success vs failure
       if (statusCode >= 200 && statusCode < 300) {
         successCount.incrementAndGet();
       } else {
         failCount.incrementAndGet();
         System.err.println("Post Method failed: " + statusCode);
       }
-
       long end = System.currentTimeMillis();
-
       long latency = end - start;
+
+      //postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
+
       data.add(RowFactory.create(start, "POST", latency, statusCode));
 
-      // Read the response body.
-      //byte[] responseBody = response.getEntity().getContent().readAllBytes();
-      //System.out.println(new String(responseBody));
-
-      // Consume response content
       EntityUtils.consume(response.getEntity());
       long endtime = System.currentTimeMillis();
       System.out.println("POST END: " + endtime + Thread.currentThread().getName());

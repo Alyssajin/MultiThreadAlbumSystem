@@ -1,12 +1,11 @@
 import com.google.gson.Gson;
-import java.io.InputStream;
+
 import java.nio.charset.StandardCharsets;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 
-@WebServlet(name = "Server", value = "/Server")
 @MultipartConfig
 public class Server extends HttpServlet {
   @Override
@@ -24,10 +23,10 @@ public class Server extends HttpServlet {
     String newUrl = url.substring(0, url.length() - lastPart.length() - 1);
     //System.out.println(newUrl);
     //System.out.println(lastPart);
-    if (newUrl.equals("/IGORTON/AlbumStore/1.0.0/albums") && lastPart.equals("1")) {
+    if (newUrl.equals("/") && lastPart.equals("1")) {
       response.setStatus(HttpServletResponse.SC_OK);
       response.setContentType("application/json");
-      AlbumInfo album = new AlbumInfo();
+      AlbumTable album = new AlbumTable();
       String respondAlbum = new Gson().toJson(album);
       response.getWriter().write(respondAlbum);
     } else {
@@ -46,7 +45,7 @@ public class Server extends HttpServlet {
       response.getWriter().write("missing parameters");
       return;
     }
-    if (!url.equals("/IGORTON/AlbumStore/1.0.0/albums")) {
+    if (!url.equals("/album")) {
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
       response.getWriter().write("invalid parameters");
       return;
@@ -71,7 +70,7 @@ public class Server extends HttpServlet {
         year = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);;
       }
     }
-    AlbumInfo newAlbum = new AlbumInfo(artist, title, year);
+    AlbumTable newAlbum = new AlbumTable(artist, title, year);
     response.setStatus(HttpServletResponse.SC_CREATED);
     response.getWriter().write(new Gson().toJson(newAlbum));
   }

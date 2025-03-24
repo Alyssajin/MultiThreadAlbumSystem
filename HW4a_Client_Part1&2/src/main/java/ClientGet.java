@@ -30,6 +30,7 @@ public class ClientGet implements Runnable {
   private final int port;
   private final String IPAddr;
 
+
   public ClientGet(String IPAddr, int port, CloseableHttpClient client, List<Row> data) {
     this.IPAddr = IPAddr;
     this.port = port;
@@ -40,30 +41,23 @@ public class ClientGet implements Runnable {
   // stolen from https://hc.apache.org/httpclient-legacy/tutorial.html
   public void run() {
 
-    // Create a post method instance.
-
-    // Provide custom retry handler is necessary
-    /*
-    getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
-        new DefaultHttpMethodRetryHandler(5, false));
-     */
     try {
+
       URI uri = new URIBuilder()
               .setScheme("http")
               .setHost(IPAddr)
               .setPort(port)
               .setPath("/album/1")
               .build();
-      // Create a method instance.
+
       HttpGet getMethod = new HttpGet(uri);
 
       long start = System.currentTimeMillis();
       System.out.println("GET START: " + start + Thread.currentThread().getName());
-      // Execute the method.
+
       CloseableHttpResponse response = client.execute(getMethod);
 
       int statusCode = response.getCode();
-
       if (statusCode >= 200 && statusCode < 300) {
         successCount.incrementAndGet();
       } else {
@@ -71,7 +65,6 @@ public class ClientGet implements Runnable {
         System.err.println("Post Method failed: " + statusCode);
       }
 
-      // Read the response body.
       byte[] responseBody = response.getEntity().getContent().readAllBytes();
       //System.out.println(new String(responseBody));
       long end = System.currentTimeMillis();

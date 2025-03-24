@@ -9,17 +9,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5433b99f-dc6f-4fcd-9e64-aea5520d2eae" name="Changes" comment="feat: update workspace configuration and refactor Main class for improved Kafka client integration">
-      <change afterPath="$PROJECT_DIR$/src/main/java/ClientReview.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Like.java" afterDir="false" />
+    <list default="true" id="5433b99f-dc6f-4fcd-9e64-aea5520d2eae" name="Changes" comment="feat: refactor Client classes to use dynamic port configuration and update server URL mappings">
+      <change afterPath="$PROJECT_DIR$/../go_server/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_server/.idea/checkstyle-idea.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_server/.idea/go_server.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_server/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_server/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_server/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../go_server_kafka_test/.idea/go_server_kafka_test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../java_server/src/main/java/AlbumTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ClientGet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ClientGet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ClientPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ClientPost.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ClientReview.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ClientReview.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/ClientGet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientGet.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ClientGetKafka.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/ClientPost.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientPost.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ClientPostKafka.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java_server/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../java_server/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java_server/src/main/java/AlbumInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java_server/src/main/java/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/../java_server/src/main/java/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java_server/web/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../java_server/web/WEB-INF/web.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,8 +43,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -57,34 +71,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Client.executor&quot;: &quot;Run&quot;,
-    &quot;Application.HW4aServer.executor&quot;: &quot;Run&quot;,
-    &quot;Application.RequestCounterBarrier.executor&quot;: &quot;Run&quot;,
-    &quot;Application.go_server.executor&quot;: &quot;Run&quot;,
-    &quot;Application.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/nuanxin/Desktop/NEU/6650/MultiThreadAlbumSystem/HW4a_Client_Part1&amp;2/lib&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.16781609&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.maven.repository.indices&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Client.executor": "Run",
+    "Application.HW4aServer.executor": "Run",
+    "Application.RequestCounterBarrier.executor": "Run",
+    "Application.go_server.executor": "Run",
+    "Application.main.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/nuanxin/Desktop/NEU/6650/MultiThreadAlbumSystem/HW4a_Client_Part1&2/lib",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.16781609",
+    "settings.editor.selected.configurable": "reference.settings.project.maven.repository.indices",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/lib" />
@@ -132,7 +147,8 @@
       <workItem from="1739149206284" duration="32892000" />
       <workItem from="1741320820132" duration="3887000" />
       <workItem from="1741383938459" duration="36078000" />
-      <workItem from="1742582332431" duration="4707000" />
+      <workItem from="1742582332431" duration="4838000" />
+      <workItem from="1742596729125" duration="26983000" />
     </task>
     <task id="LOCAL-00001" summary="feat: add resilience4j circuit breaker for improved error handling and fault tolerance">
       <option name="closed" value="true" />
@@ -166,7 +182,31 @@
       <option name="project" value="LOCAL" />
       <updated>1741912270512</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: implement ClientReview class for handling likes and dislikes with HTTP requests">
+      <option name="closed" value="true" />
+      <created>1742594307712</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1742594307712</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: implement ClientReview class for handling likes and dislikes in HTTP requests">
+      <option name="closed" value="true" />
+      <created>1742594321420</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1742594321420</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat: refactor Client classes to use dynamic port configuration and update server URL mappings">
+      <option name="closed" value="true" />
+      <created>1742598249734</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1742598249734</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -177,7 +217,10 @@
     <MESSAGE value="feat: integrate resilience4j retry mechanism for enhanced fault tolerance" />
     <MESSAGE value="feat: implement Kafka client for GET and POST operations with resilience features" />
     <MESSAGE value="feat: update workspace configuration and refactor Main class for improved Kafka client integration" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: update workspace configuration and refactor Main class for improved Kafka client integration" />
+    <MESSAGE value="feat: implement ClientReview class for handling likes and dislikes with HTTP requests" />
+    <MESSAGE value="feat: implement ClientReview class for handling likes and dislikes in HTTP requests" />
+    <MESSAGE value="feat: refactor Client classes to use dynamic port configuration and update server URL mappings" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: refactor Client classes to use dynamic port configuration and update server URL mappings" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
