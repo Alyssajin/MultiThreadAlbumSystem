@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -54,6 +55,27 @@ func main() {
 	)
 	failOnError(err, "Failed to declare a queue for postAlbum")
 
+	// albumQueue, err := ch.QueueDeclare(
+	// 	"",    // name
+	// 	false, // durable
+	// 	false, // delete when unused
+	// 	false, // exclusive
+	// 	false, // no-wait
+	// 	nil,   // arguments
+	// )
+	// failOnError(err, "Failed to declare a queue for postAlbum")
+
+	// msgs_album, err := ch.Consume(
+	// 	albumQueue.Name, // queue
+	// 	"",              // consumer
+	// 	true,            // auto-ack
+	// 	false,           // exclusive
+	// 	false,           // no-local
+	// 	false,           // no-wait
+	// 	nil,             // args
+	// )
+	// failOnError(err, "Failed to register a consumer for response post album")
+
 	preferredQueue, err := ch.QueueDeclare(
 		"postPreferred", // name
 		true,            // durable
@@ -73,6 +95,17 @@ func main() {
 		nil,                    // arguments
 	)
 	failOnError(err, "Failed to declare a queue for postRes")
+
+	msgs_album, err := ch.Consume(
+		resAlbumQueue.Name, // queue
+		"",                 // consumer
+		true,               // auto-ack
+		false,              // exclusive
+		false,              // no-local
+		false,              // no-wait
+		nil,                // args
+	)
+	failOnError(err, "Failed to register a consumer for response post album")
 
 	r := gin.Default()
 
@@ -126,23 +159,25 @@ func main() {
 		albumDataBytes, err := json.Marshal(albumData)
 		failOnError(err, "Failed to marshal album data")
 
-		// // Channel to receive the albumId from the background goroutine
-		// albumIDChannel := make(chan string)
+		// Channel to receive the albumId from the background goroutine
+		albumIDChannel := make(chan string)
 
-		// corrID_album := uuid.New().String()
-		// log.Printf("Correlation ID: %s", corrID_album)
+		corrID_album := uuid.New().String()
+		log.Printf("Correlation ID: %s", corrID_album)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		err = ch.PublishWithContext(ctx,
-			"",              // exchange
+			"", // exchange
+			// "postAlbum", // routing key
 			albumQueue.Name, // Queue name
 			false,           // mandatory
 			false,           // immediate
 			amqp.Publishing{
-				ContentType: "application/json",
-				// CorrelationId: corrID_album,
+				ContentType:   "application/json",
+				CorrelationId: corrID_album,
+				// ReplyTo:       albumQueue.Name,
 				ReplyTo: resAlbumQueue.Name,
 				Body:    albumDataBytes,
 			})
@@ -151,43 +186,29 @@ func main() {
 			failOnError(err, "Failed to send album message to RabbitMQ")
 		}
 
-		// msgs_album, err := ch.Consume(
-		// 	resAlbumQueue.Name, // queue
-		// 	"",                 // consumer
-		// 	true,               // auto-ack
-		// 	false,              // exclusive
-		// 	false,              // no-local
-		// 	false,              // no-wait
-		// 	nil,                // args
-		// )
-		// if err != nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to consume response post album message from RabbitMQ"})
-		// 	failOnError(err, "Failed to consume response message from RabbitMQ")
-		// }
-
-		// go func() {
-		// 	for msg := range msgs_album {
-		// 		log.Printf("Received a message: %s", msg.Body)
-		// 		fmt.Print("msg_album.correlationid:", msg.CorrelationId)
-		// 		fmt.Print("\ncorrID_album:", corrID_album)
-		// 		if corrID_album == msg.CorrelationId {
-		// 			albumId := string(msg.Body)
-		// 			log.Print("Album data  %v published to RabbitMQ successfully", albumId)
-		// 			albumIDChannel <- albumId // Send the albumId to the channel
-		// 			break
-		// 		}
-		// 	}
-		// }()
+		go func() {
+			for msg := range msgs_album {
+				log.Printf("Received a message: %s", msg.Body)
+				fmt.Print("msg_album.correlationid:", msg.CorrelationId)
+				fmt.Print("\ncorrID_album:", corrID_album)
+				if corrID_album == msg.CorrelationId {
+					albumId := string(msg.Body)
+					log.Print("Album data  %v published to RabbitMQ successfully", albumId)
+					albumIDChannel <- albumId // Send the albumId to the channel
+					break
+				}
+			}
+		}()
 
 		fmt.Println("Album creation in progress. Please wait for the confirmation.")
 
-		// // Wait for the albumId to be received from the channel
-		// albumId := <-albumIDChannel
+		// Wait for the albumId to be received from the channel
+		albumId := <-albumIDChannel
 
-		// // Now that we have the albumId, send the final response back to the client
-		// c.JSON(200, gin.H{"message": "Album created", "albumId": albumId, "imageSize": imageSize})
+		// Now that we have the albumId, send the final response back to the client
+		c.JSON(200, gin.H{"message": "Album created", "albumId": albumId, "imageSize": imageSize})
 
-		c.JSON(200, gin.H{"created": "Album created"})
+		// c.JSON(200, gin.H{"created": "Album created"})
 	})
 
 	r.POST("/album/:likeOrNot/:albumId", func(c *gin.Context) {

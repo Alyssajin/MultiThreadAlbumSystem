@@ -10,30 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5433b99f-dc6f-4fcd-9e64-aea5520d2eae" name="Changes" comment="feat: refactor Client classes to use dynamic port configuration and update server URL mappings">
-      <change afterPath="$PROJECT_DIR$/../go_server/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../go_server/.idea/checkstyle-idea.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../go_server/.idea/go_server.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../go_server/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../go_server/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../go_server/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../go_server_kafka_test/.idea/go_server_kafka_test.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../java_server/src/main/java/AlbumTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ClientGet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ClientGet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ClientPost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ClientPost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ClientReview.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ClientReview.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ClientGet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientGet.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ClientPost.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientPost.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../go_server/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../go_server/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/db.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../go_server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../java_server/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../java_server/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../java_server/src/main/java/AlbumInfo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../java_server/src/main/java/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/../java_server/src/main/java/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../java_server/web/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../java_server/web/WEB-INF/web.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +127,7 @@
       <workItem from="1741320820132" duration="3887000" />
       <workItem from="1741383938459" duration="36078000" />
       <workItem from="1742582332431" duration="4838000" />
-      <workItem from="1742596729125" duration="26983000" />
+      <workItem from="1742596729125" duration="29728000" />
     </task>
     <task id="LOCAL-00001" summary="feat: add resilience4j circuit breaker for improved error handling and fault tolerance">
       <option name="closed" value="true" />

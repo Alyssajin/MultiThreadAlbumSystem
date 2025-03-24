@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -95,15 +98,15 @@ func main() {
 	)
 	failOnError(err, "Failed to declare a queue for postPreferred")
 
-	// resAlbumQueue, err := ch.QueueDeclare(
-	// 	"response_album_queue", // name
-	// 	true,                   // durable
-	// 	false,                  // delete when unused
-	// 	false,                  // exclusive
-	// 	false,                  // no-wait
-	// 	nil,                    // arguments
-	// )
-	// failOnError(err, "Failed to declare a queue for postRes")
+	resAlbumQueue, err := ch.QueueDeclare(
+		"response_album_queue", // name
+		true,                   // durable
+		false,                  // delete when unused
+		false,                  // exclusive
+		false,                  // no-wait
+		nil,                    // arguments
+	)
+	failOnError(err, "Failed to declare a queue for postRes")
 
 	// err = ch.Qos(
 	// 	1,     // prefetch count
@@ -137,8 +140,8 @@ func main() {
 	var forever chan struct{}
 
 	go func() {
-		// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		// defer cancel()
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
 		for d := range albumMsgs {
 			log.Print("Recieved a correlation ID from post album: ", d.CorrelationId)
@@ -156,8 +159,8 @@ func main() {
 			imageSize := int(albumData["image_size"].(float64))
 
 			// Save to DB
-			// res, err := db.Exec(`
-			_, err := db.Exec(`
+			// _, err := db.Exec(`
+			res, err := db.Exec(`
 				INSERT INTO album (artist, title, year, image, image_size)
 				VALUES (?, ?, ?, ?, ?)
 				`, artist, title, year, image, imageSize)
@@ -166,21 +169,22 @@ func main() {
 				continue
 			}
 
-			// primaryKey, _ := res.LastInsertId()
-			// response := fmt.Sprintf("%d", primaryKey)
+			primaryKey, _ := res.LastInsertId()
+			response := fmt.Sprintf("%d", primaryKey)
 
-			// // Send response
-			// err = ch.PublishWithContext(ctx,
-			// 	"",                 // exchange
-			// 	resAlbumQueue.Name, // routing key
-			// 	false,              // mandatory
-			// 	false,              // immediate
-			// 	amqp.Publishing{
-			// 		ContentType:   "text/plain",
-			// 		CorrelationId: d.CorrelationId,
-			// 		Body:          []byte(response),
-			// 	})
-			// failOnError(err, "Failed to publish response")
+			// Send response
+			err = ch.PublishWithContext(ctx,
+				"", // exchange
+				// d.ReplyTo, // routing key
+				resAlbumQueue.Name, // routing key
+				false,              // mandatory
+				false,              // immediate
+				amqp.Publishing{
+					ContentType:   "text/plain",
+					CorrelationId: d.CorrelationId,
+					Body:          []byte(response),
+				})
+			failOnError(err, "Failed to publish response")
 			d.Ack(false)
 		}
 
