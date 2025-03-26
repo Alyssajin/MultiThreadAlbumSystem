@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,11 @@ type Profile struct {
 	Title  string `json:"title"`
 	Year   string `json:"year"`
 }
+
+var pendingResponses = struct {
+	sync.Mutex
+	m map[string]chan string
+}{m: make(map[string]chan string)}
 
 func failOnError(err error, msg string) {
 	if err != nil {
@@ -65,17 +71,6 @@ func main() {
 	// )
 	// failOnError(err, "Failed to declare a queue for postAlbum")
 
-	// msgs_album, err := ch.Consume(
-	// 	albumQueue.Name, // queue
-	// 	"",              // consumer
-	// 	true,            // auto-ack
-	// 	false,           // exclusive
-	// 	false,           // no-local
-	// 	false,           // no-wait
-	// 	nil,             // args
-	// )
-	// failOnError(err, "Failed to register a consumer for response post album")
-
 	preferredQueue, err := ch.QueueDeclare(
 		"postPreferred", // name
 		true,            // durable
@@ -99,13 +94,32 @@ func main() {
 	msgs_album, err := ch.Consume(
 		resAlbumQueue.Name, // queue
 		"",                 // consumer
-		true,               // auto-ack
+		false,              // auto-ack
 		false,              // exclusive
 		false,              // no-local
 		false,              // no-wait
 		nil,                // args
 	)
 	failOnError(err, "Failed to register a consumer for response post album")
+
+	go func() {
+		for msg := range msgs_album {
+			log.Printf("Received a message: %s", msg.Body)
+			fmt.Print("msg_album.correlationid:", msg.CorrelationId)
+			// fmt.Print("\ncorrID_album:", corrID_album)
+			corrID := msg.CorrelationId
+
+			pendingResponses.Lock()
+			respChan, ok := pendingResponses.m[corrID]
+			if ok {
+				respChan <- string(msg.Body)
+				delete(pendingResponses.m, corrID)
+			}
+			pendingResponses.Unlock()
+			msg.Ack(false)
+
+		}
+	}()
 
 	r := gin.Default()
 
@@ -160,10 +174,15 @@ func main() {
 		failOnError(err, "Failed to marshal album data")
 
 		// Channel to receive the albumId from the background goroutine
-		albumIDChannel := make(chan string)
+		// albumIDChannel := make(chan string)
 
 		corrID_album := uuid.New().String()
-		log.Printf("Correlation ID: %s", corrID_album)
+		// log.Printf("Correlation ID: %s", corrID_album)
+
+		responseChan := make(chan string)
+		pendingResponses.Lock()
+		pendingResponses.m[corrID_album] = responseChan
+		pendingResponses.Unlock()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -186,29 +205,38 @@ func main() {
 			failOnError(err, "Failed to send album message to RabbitMQ")
 		}
 
-		go func() {
-			for msg := range msgs_album {
-				log.Printf("Received a message: %s", msg.Body)
-				fmt.Print("msg_album.correlationid:", msg.CorrelationId)
-				fmt.Print("\ncorrID_album:", corrID_album)
-				if corrID_album == msg.CorrelationId {
-					albumId := string(msg.Body)
-					log.Print("Album data  %v published to RabbitMQ successfully", albumId)
-					albumIDChannel <- albumId // Send the albumId to the channel
-					break
-				}
-			}
-		}()
+		select {
+		case albumId := <-responseChan:
+			c.JSON(http.StatusOK, gin.H{"message": "Album created", "albumId": albumId, "imageSize": imageSize})
+		case <-ctx.Done():
+			c.JSON(http.StatusGatewayTimeout, gin.H{"error": "Timeout waiting for album response"})
+		}
 
-		fmt.Println("Album creation in progress. Please wait for the confirmation.")
+		// go func() {
+		// 	for msg := range msgs_album {
+		// 		// log.Printf("Received a message: %s", msg.Body)
+		// 		// fmt.Print("msg_album.correlationid:", msg.CorrelationId)
+		// 		// fmt.Print("\ncorrID_album:", corrID_album)
+		// 		if corrID_album == msg.CorrelationId {
+		// 			albumId := string(msg.Body)
+		// 			log.Print("Album data  %v published to RabbitMQ successfully", albumId)
+		// 			albumIDChannel <- albumId // Send the albumId to the channel
+		// 			msg.Ack(false)
+		// 			close(albumIDChannel)
+		// 			break
+		// 		}
 
-		// Wait for the albumId to be received from the channel
-		albumId := <-albumIDChannel
+		// 	}
+		// }()
 
-		// Now that we have the albumId, send the final response back to the client
-		c.JSON(200, gin.H{"message": "Album created", "albumId": albumId, "imageSize": imageSize})
+		// fmt.Println("Album creation in progress. Please wait for the confirmation.")
 
-		// c.JSON(200, gin.H{"created": "Album created"})
+		// // Wait for the albumId to be received from the channel
+		// albumId := <-albumIDChannel
+
+		// // Now that we have the albumId, send the final response back to the client
+		// c.JSON(200, gin.H{"message": "Album created", "albumId": albumId, "imageSize": imageSize})
+
 	})
 
 	r.POST("/album/:likeOrNot/:albumId", func(c *gin.Context) {

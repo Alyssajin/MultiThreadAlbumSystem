@@ -21,6 +21,85 @@ func failOnError(err error, msg string) {
 	}
 }
 
+func postAlbum(albumMsgs <-chan amqp.Delivery, ch *amqp.Channel, resAlbumQueue amqp.Queue) {
+	// defer wg.Done()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	for d := range albumMsgs {
+		log.Print("Recieved a correlation ID from post album: ", d.CorrelationId)
+
+		var albumData map[string]interface{}
+		if err := json.Unmarshal(d.Body, &albumData); err != nil {
+			log.Printf("Failed to unmarshal album profile: %v", err)
+			continue
+		}
+
+		artist := albumData["artist"].(string)
+		title := albumData["title"].(string)
+		year := int(albumData["year"].(float64))
+		image := albumData["image"].(string)
+		imageSize := int(albumData["image_size"].(float64))
+
+		// Save to DB
+		res, err := db.Exec(`
+			INSERT INTO album (artist, title, year, image, image_size)
+			VALUES (?, ?, ?, ?, ?)
+			`, artist, title, year, image, imageSize)
+		if err != nil {
+			log.Printf("Failed to insert album: %v", err)
+			continue
+		}
+
+		primaryKey, _ := res.LastInsertId()
+		response := fmt.Sprintf("%d", primaryKey)
+
+		// Send response
+		err = ch.PublishWithContext(ctx,
+			"", // exchange
+			// d.ReplyTo, // routing key
+			resAlbumQueue.Name, // routing key
+			false,              // mandatory
+			false,              // immediate
+			amqp.Publishing{
+				ContentType:   "text/plain",
+				CorrelationId: d.CorrelationId,
+				Body:          []byte(response),
+			})
+		failOnError(err, "Failed to publish response")
+		d.Ack(false)
+	}
+
+}
+
+func postLike(preferredMsgs <-chan amqp.Delivery, ch *amqp.Channel) {
+	// defer wg.Done()
+
+	for d := range preferredMsgs {
+
+		var preferredData map[string]interface{}
+		if err := json.Unmarshal(d.Body, &preferredData); err != nil {
+			log.Printf("Failed to unmarshal preferred data: %v", err)
+			continue
+		}
+
+		albumId := int(preferredData["albumId"].(float64))
+		likeOrNot := preferredData["like"].(bool)
+
+		// Save to DB
+		_, err := db.Exec(`
+			INSERT INTO album_like (album_id, like_or_not)
+			VALUES (?, ?)
+			`, albumId, likeOrNot)
+		if err != nil {
+			log.Printf("Failed to insert album like: %v", err)
+			continue
+		}
+		d.Ack(false)
+	}
+}
+
 func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -109,7 +188,7 @@ func main() {
 	failOnError(err, "Failed to declare a queue for postRes")
 
 	// err = ch.Qos(
-	// 	1,     // prefetch count
+	// 	0,     // prefetch count
 	// 	0,     // prefetch size
 	// 	false, // global
 	// )
@@ -137,84 +216,99 @@ func main() {
 	)
 	failOnError(err, "Failed to register a preference post consumer")
 
-	var forever chan struct{}
+	// var wg sync.WaitGroup
+	// wg.Add(2)
 
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+	// go postAlbum(&wg, albumMsgs, ch, resAlbumQueue)
+	// go postLike(&wg, preferredMsgs, ch)
 
-		for d := range albumMsgs {
-			log.Print("Recieved a correlation ID from post album: ", d.CorrelationId)
+	// var forever chan struct{}
+	forever := make(chan struct{})
 
-			var albumData map[string]interface{}
-			if err := json.Unmarshal(d.Body, &albumData); err != nil {
-				log.Printf("Failed to unmarshal album profile: %v", err)
-				continue
-			}
+	worker := 10
 
-			artist := albumData["artist"].(string)
-			title := albumData["title"].(string)
-			year := int(albumData["year"].(float64))
-			image := albumData["image"].(string)
-			imageSize := int(albumData["image_size"].(float64))
+	for w := 0; w < worker; w++ {
+		go postAlbum(albumMsgs, ch, resAlbumQueue)
+		// go func() {
+		// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		// 	defer cancel()
 
-			// Save to DB
-			// _, err := db.Exec(`
-			res, err := db.Exec(`
-				INSERT INTO album (artist, title, year, image, image_size)
-				VALUES (?, ?, ?, ?, ?)
-				`, artist, title, year, image, imageSize)
-			if err != nil {
-				log.Printf("Failed to insert album: %v", err)
-				continue
-			}
+		// 	for d := range albumMsgs {
+		// 		log.Print("Recieved a correlation ID from post album: ", d.CorrelationId)
 
-			primaryKey, _ := res.LastInsertId()
-			response := fmt.Sprintf("%d", primaryKey)
+		// 		var albumData map[string]interface{}
+		// 		if err := json.Unmarshal(d.Body, &albumData); err != nil {
+		// 			log.Printf("Failed to unmarshal album profile: %v", err)
+		// 			continue
+		// 		}
 
-			// Send response
-			err = ch.PublishWithContext(ctx,
-				"", // exchange
-				// d.ReplyTo, // routing key
-				resAlbumQueue.Name, // routing key
-				false,              // mandatory
-				false,              // immediate
-				amqp.Publishing{
-					ContentType:   "text/plain",
-					CorrelationId: d.CorrelationId,
-					Body:          []byte(response),
-				})
-			failOnError(err, "Failed to publish response")
-			d.Ack(false)
-		}
+		// 		artist := albumData["artist"].(string)
+		// 		title := albumData["title"].(string)
+		// 		year := int(albumData["year"].(float64))
+		// 		image := albumData["image"].(string)
+		// 		imageSize := int(albumData["image_size"].(float64))
 
-	}()
+		// 		// Save to DB
+		// 		res, err := db.Exec(`
+		// 		INSERT INTO album (artist, title, year, image, image_size)
+		// 		VALUES (?, ?, ?, ?, ?)
+		// 		`, artist, title, year, image, imageSize)
+		// 		if err != nil {
+		// 			log.Printf("Failed to insert album: %v", err)
+		// 			continue
+		// 		}
 
-	go func() {
-		for d := range preferredMsgs {
+		// 		primaryKey, _ := res.LastInsertId()
+		// 		response := fmt.Sprintf("%d", primaryKey)
 
-			var preferredData map[string]interface{}
-			if err := json.Unmarshal(d.Body, &preferredData); err != nil {
-				log.Printf("Failed to unmarshal preferred data: %v", err)
-				continue
-			}
+		// 		// Send response
+		// 		err = ch.PublishWithContext(ctx,
+		// 			"", // exchange
+		// 			// d.ReplyTo, // routing key
+		// 			resAlbumQueue.Name, // routing key
+		// 			false,              // mandatory
+		// 			false,              // immediate
+		// 			amqp.Publishing{
+		// 				ContentType:   "text/plain",
+		// 				CorrelationId: d.CorrelationId,
+		// 				Body:          []byte(response),
+		// 			})
+		// 		failOnError(err, "Failed to publish response")
+		// 		d.Ack(false)
+		// 	}
 
-			albumId := int(preferredData["albumId"].(float64))
-			likeOrNot := preferredData["like"].(bool)
+		// }()
 
-			// Save to DB
-			_, err := db.Exec(`
-				INSERT INTO album_like (album_id, like_or_not)
-				VALUES (?, ?)
-				`, albumId, likeOrNot)
-			if err != nil {
-				log.Printf("Failed to insert album like: %v", err)
-				continue
-			}
-			d.Ack(false)
-		}
-	}()
+		// go func() {
+		// 	for d := range preferredMsgs {
+
+		// 		var preferredData map[string]interface{}
+		// 		if err := json.Unmarshal(d.Body, &preferredData); err != nil {
+		// 			log.Printf("Failed to unmarshal preferred data: %v", err)
+		// 			continue
+		// 		}
+
+		// 		albumId := int(preferredData["albumId"].(float64))
+		// 		likeOrNot := preferredData["like"].(bool)
+
+		// 		// Save to DB
+		// 		_, err := db.Exec(`
+		// 		INSERT INTO album_like (album_id, like_or_not)
+		// 		VALUES (?, ?)
+		// 		`, albumId, likeOrNot)
+		// 		if err != nil {
+		// 			log.Printf("Failed to insert album like: %v", err)
+		// 			continue
+		// 		}
+		// 		d.Ack(false)
+		// 	}
+		// }()
+	}
+
+	for w := 0; w < worker; w++ {
+		go postLike(preferredMsgs, ch)
+	}
 
 	<-forever
-
+	// select {}
 }
