@@ -19,7 +19,7 @@ import org.apache.spark.sql.types.StructType;
 // Delete data.csv folder each time before running the program
 public class Main {
   private static final int GROUP_SIZE = 10;
-  private static final int NUMBER_OF_GROUPS = 10;
+  private static final int NUMBER_OF_GROUPS = 30;
   private static final int DELAY = 2;
 //  private static final String IPAddr = "demo-alb-1739993920.us-west-2.elb.amazonaws.com";
   private static final String IPAddr = "localhost";

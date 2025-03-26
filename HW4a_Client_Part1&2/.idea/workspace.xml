@@ -12,7 +12,15 @@
     <list default="true" id="5433b99f-dc6f-4fcd-9e64-aea5520d2eae" name="Changes" comment="feat: refactor Client classes to use dynamic port configuration and update server URL mappings">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ClientGet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientGet.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ClientPost.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientPost.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ClientReview.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ClientReview.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Like.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Like.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go_server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go_server/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +135,7 @@
       <workItem from="1741320820132" duration="3887000" />
       <workItem from="1741383938459" duration="36078000" />
       <workItem from="1742582332431" duration="4838000" />
-      <workItem from="1742596729125" duration="30822000" />
+      <workItem from="1742596729125" duration="61124000" />
     </task>
     <task id="LOCAL-00001" summary="feat: add resilience4j circuit breaker for improved error handling and fault tolerance">
       <option name="closed" value="true" />
@@ -212,6 +220,10 @@
           <line>43</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.ArithmeticException" package="java.lang" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
