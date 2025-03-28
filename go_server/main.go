@@ -256,7 +256,7 @@ func main() {
 		}
 	})
 
-	r.POST("/albums/:likeOrNot/:albumId", func(c *gin.Context) {
+	r.POST("/review/:likeOrNot/:albumId", func(c *gin.Context) {
 		log.Print("Inside like route")
 		likeOrNot := c.Param("likeOrNot")
 		albumId := c.Param("albumId")
@@ -350,7 +350,7 @@ func main() {
 		}
 	})
 
-	r.GET("/albums/review/:albumId", func(c *gin.Context) {
+	r.GET("/review/:albumId", func(c *gin.Context) {
 		albumId := c.Param("albumId")
 		_, err := strconv.Atoi(albumId)
 		if err != nil {
