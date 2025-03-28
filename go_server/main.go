@@ -42,68 +42,9 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	albumQueue, err := ch.QueueDeclare(
-		"postAlbum", // name
-		true,        // durable
-		false,       // delete when unused
-		false,       // exclusive
-		false,       // no-wait
-		nil,         // arguments
-	)
-	failOnError(err, "Failed to declare a queue for postAlbum")
-
-	// albumQueue, err := ch.QueueDeclare(
-	// 	"",    // name
-	// 	false, // durable
-	// 	false, // delete when unused
-	// 	false, // exclusive
-	// 	false, // no-wait
-	// 	nil,   // arguments
-	// )
-	// failOnError(err, "Failed to declare a queue for postAlbum")
-
-	preferredQueue, err := ch.QueueDeclare(
-		"postPreferred", // name
-		true,            // durable
-		false,           // delete when unused
-		false,           // exclusive
-		false,           // no-wait
-		nil,             // arguments
-	)
-	failOnError(err, "Failed to declare a queue for postPreferred")
-
-	resAlbumQueue, err := ch.QueueDeclare(
-		"response_album_queue", // name
-		true,                   // durable
-		false,                  // delete when unused
-		false,                  // exclusive
-		false,                  // no-wait
-		nil,                    // arguments
-	)
-	failOnError(err, "Failed to declare a queue for postRes")
-
-	msgs_album, err := ch.Consume(
-		resAlbumQueue.Name, // queue
-		"",                 // consumer
-		false,              // auto-ack
-		false,              // exclusive
-		false,              // no-local
-		false,              // no-wait
-		nil,                // args
-	)
-	failOnError(err, "Failed to register a consumer for response post album")
-
+func processRabbitMqResponse(msgs <-chan amqp.Delivery) {
 	go func() {
-		for msg := range msgs_album {
+		for msg := range msgs {
 			log.Printf("Received a message: %s", msg.Body)
 			fmt.Print("msg_album.correlationid:", msg.CorrelationId)
 			// fmt.Print("\ncorrID_album:", corrID_album)
@@ -120,10 +61,115 @@ func main() {
 
 		}
 	}()
+}
+
+func main() {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	// Declare a queue for the post an album
+	albumQueue, err := ch.QueueDeclare(
+		"post_album", // name
+		true,         // durable
+		false,        // delete when unused
+		false,        // exclusive
+		false,        // no-wait
+		nil,          // arguments
+	)
+	failOnError(err, "Failed to declare a queue for post_album")
+
+	// Declare a queue for the post an album like
+	preferredQueue, err := ch.QueueDeclare(
+		"post_preferred", // name
+		true,             // durable
+		false,            // delete when unused
+		false,            // exclusive
+		false,            // no-wait
+		nil,              // arguments
+	)
+	failOnError(err, "Failed to declare a queue for post_preferred")
+
+	// Declare a queue for the response from post album
+	resAlbumQueue, err := ch.QueueDeclare(
+		"response_album_queue", // name
+		true,                   // durable
+		false,                  // delete when unused
+		false,                  // exclusive
+		false,                  // no-wait
+		nil,                    // arguments
+	)
+	failOnError(err, "Failed to declare a queue for postRes")
+
+	// Declare a queue for RPC: getting the album by ID
+	retrieveAlbumQueue, err := ch.QueueDeclare(
+		"",    // name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	failOnError(err, "Failed to declare a queue for retrieveAlbum")
+
+	// Declare a queue for RPC: getting the album review by ID
+	retrieveReviewQueue, err := ch.QueueDeclare(
+		"",    // name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	failOnError(err, "Failed to declare a queue for retrieveReview")
+
+	// Consume messages from the album queue
+	msgsAlbum, err := ch.Consume(
+		resAlbumQueue.Name, // queue
+		"",                 // consumer
+		false,              // auto-ack
+		false,              // exclusive
+		false,              // no-local
+		false,              // no-wait
+		nil,                // args
+	)
+	failOnError(err, "Failed to register a consumer for response post album")
+
+	// Consume messages from retrieve album queue
+	msgsRetrieveAlbum, err := ch.Consume(
+		retrieveAlbumQueue.Name, // queue
+		"",                      // consumer
+		false,                   // auto-ack
+		false,                   // exclusive
+		false,                   // no-local
+		false,                   // no-wait
+		nil,                     // args
+	)
+	failOnError(err, "Failed to register a consumer for retrieve album")
+
+	// Consume messages from retrieve review queue
+	msgsRetrieveReview, err := ch.Consume(
+		retrieveReviewQueue.Name, // queue
+		"",                       // consumer
+		false,                    // auto-ack
+		false,                    // exclusive
+		false,                    // no-local
+		false,                    // no-wait
+		nil,                      // args
+	)
+	failOnError(err, "Failed to register a consumer for retrieve review")
+
+	go processRabbitMqResponse(msgsAlbum)
+	go processRabbitMqResponse(msgsRetrieveAlbum)
+	go processRabbitMqResponse(msgsRetrieveReview)
 
 	r := gin.Default()
 
-	r.POST("/album", func(c *gin.Context) {
+	r.POST("/albums", func(c *gin.Context) {
 		profileStr := c.PostForm("profile")
 		if profileStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing profile field"})
@@ -173,9 +219,6 @@ func main() {
 		albumDataBytes, err := json.Marshal(albumData)
 		failOnError(err, "Failed to marshal album data")
 
-		// Channel to receive the albumId from the background goroutine
-		// albumIDChannel := make(chan string)
-
 		corrID_album := uuid.New().String()
 		// log.Printf("Correlation ID: %s", corrID_album)
 
@@ -189,7 +232,7 @@ func main() {
 
 		err = ch.PublishWithContext(ctx,
 			"", // exchange
-			// "postAlbum", // routing key
+			// "post_album", // routing key
 			albumQueue.Name, // Queue name
 			false,           // mandatory
 			false,           // immediate
@@ -211,35 +254,9 @@ func main() {
 		case <-ctx.Done():
 			c.JSON(http.StatusGatewayTimeout, gin.H{"error": "Timeout waiting for album response"})
 		}
-
-		// go func() {
-		// 	for msg := range msgs_album {
-		// 		// log.Printf("Received a message: %s", msg.Body)
-		// 		// fmt.Print("msg_album.correlationid:", msg.CorrelationId)
-		// 		// fmt.Print("\ncorrID_album:", corrID_album)
-		// 		if corrID_album == msg.CorrelationId {
-		// 			albumId := string(msg.Body)
-		// 			log.Print("Album data  %v published to RabbitMQ successfully", albumId)
-		// 			albumIDChannel <- albumId // Send the albumId to the channel
-		// 			msg.Ack(false)
-		// 			close(albumIDChannel)
-		// 			break
-		// 		}
-
-		// 	}
-		// }()
-
-		// fmt.Println("Album creation in progress. Please wait for the confirmation.")
-
-		// // Wait for the albumId to be received from the channel
-		// albumId := <-albumIDChannel
-
-		// // Now that we have the albumId, send the final response back to the client
-		// c.JSON(200, gin.H{"message": "Album created", "albumId": albumId, "imageSize": imageSize})
-
 	})
 
-	r.POST("/album/:likeOrNot/:albumId", func(c *gin.Context) {
+	r.POST("/albums/:likeOrNot/:albumId", func(c *gin.Context) {
 		log.Print("Inside like route")
 		likeOrNot := c.Param("likeOrNot")
 		albumId := c.Param("albumId")
@@ -286,6 +303,95 @@ func main() {
 
 	})
 
+	r.GET("/albums/:albumId", func(c *gin.Context) {
+		albumId := c.Param("albumId")
+		_, err := strconv.Atoi(albumId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid album value"})
+		}
+
+		var albumObj Album
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		corrID := uuid.New().String()
+
+		responseChan := make(chan string)
+		pendingResponses.Lock()
+		pendingResponses.m[corrID] = responseChan
+		pendingResponses.Unlock()
+
+		err = ch.PublishWithContext(ctx,
+			"",               // exchange
+			"retrieve_queue", // routing key
+			false,            // mandatory
+			false,            // immediate
+			amqp.Publishing{
+				ContentType:   "text/plain",
+				CorrelationId: corrID,
+				ReplyTo:       retrieveAlbumQueue.Name,
+				Body:          []byte(albumId),
+			})
+		failOnError(err, "Failed to publish message for retrieving album")
+
+		select {
+		case albumInfo := <-responseChan:
+			// Unmarshal the albumInfo JSON string into the albumObj
+			log.Printf("Received album info: %s", albumInfo)
+			err := json.Unmarshal([]byte(albumInfo), &albumObj)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unmarshal album info"})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"message": "Review retrieved", "albumInfo": albumObj})
+		case <-ctx.Done():
+			c.JSON(http.StatusGatewayTimeout, gin.H{"error": "Timeout waiting for album response"})
+		}
+	})
+
+	r.GET("/albums/review/:albumId", func(c *gin.Context) {
+		albumId := c.Param("albumId")
+		_, err := strconv.Atoi(albumId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid album value"})
+		}
+
+		var response map[string]interface{}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		corrID := uuid.New().String()
+		responseChan := make(chan string)
+		pendingResponses.Lock()
+		pendingResponses.m[corrID] = responseChan
+		pendingResponses.Unlock()
+		err = ch.PublishWithContext(ctx,
+			"",                      // exchange
+			"retrieve_review_queue", // routing key
+			false,                   // mandatory
+			false,                   // immediate
+			amqp.Publishing{
+				ContentType:   "text/plain",
+				CorrelationId: corrID,
+				ReplyTo:       retrieveReviewQueue.Name,
+				Body:          []byte(albumId),
+			})
+		failOnError(err, "Failed to publish message for retrieving album review")
+		select {
+		case reviewInfo := <-responseChan:
+			log.Printf("Received review info: %s", reviewInfo)
+			err := json.Unmarshal([]byte(reviewInfo), &response)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unmarshal review info"})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"message": "Album review retrieved", "reviewInfo": response})
+		case <-ctx.Done():
+			c.JSON(http.StatusGatewayTimeout, gin.H{"error": "Timeout waiting for album review response"})
+		}
+	})
+
 	// Health check route
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -300,26 +406,6 @@ func main() {
 	// 		return
 	// 	}
 	// 	c.JSON(200, gin.H{"row_count": cnt})
-	// })
-
-	// r.GET("/album/:albumId", func(c *gin.Context) {
-	// 	albumId := c.Param("albumId")
-	// 	id, err := strconv.Atoi(albumId)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid album value"})
-	// 	}
-
-	// 	var albumObj Album
-	// 	row := db.QueryRow("SELECT artist, title, year FROM album WHERE id = ?", id)
-	// 	if err := row.Scan(&albumObj.Artist, &albumObj.Title, &albumObj.Year); err != nil {
-	// 		if err == sql.ErrNoRows {
-	// 			c.JSON(http.StatusNotFound, gin.H{"error": "Album not found"})
-	// 		} else {
-	// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 		}
-	// 		return
-	// 	}
-	// 	c.JSON(200, albumObj)
 	// })
 
 	// Optionally, pass a port via environment variable or default to 8080
