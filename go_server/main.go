@@ -127,6 +127,11 @@ func main() {
 	)
 	failOnError(err, "Failed to declare a queue for retrieveReview")
 
+	err = ch.Qos(
+		50,    // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
 	// Consume messages from the album queue
 	msgsAlbum, err := ch.Consume(
 		resAlbumQueue.Name, // queue
